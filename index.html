@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        /*
+        *
+        *
+        *
+        *
+        * */
+    </script>
+    <style>
+        input {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            /*border: none;*/
+        }
+
+        body > div {
+            /*border: 1px solid black;*/
+            margin-bottom: 3px;
+            width: 1200px;
+            height: 30px;
+        }
+
+        .header {
+            display: flex;
+            /*width: 1200px;*/
+        }
+        .header>*{
+            margin-right: 5px;
+        }
+
+        #tab {
+            display: flex;
+            overflow: auto;
+            height: 100%;
+        }
+
+        .tab_if{background-color: #EDEDED;}
+        .tab_kj{background-color: #FCE4D6;}
+        .tab_uk{background-color: #DDEBF7;}
+        .tab_mb{background-color: #E2EFDA;}
+        .tab_av{background-color: #9966FF;}
+        .tab_cr{background-color: #9966FF;}
+        .tab_bg{background-color: #FF66CC;}
+        .tab_sp{background-color: #FFCCCC;}
+
+        .tab_row {
+            height: 50px;
+            width: 100px;
+            margin: 0px 2px 0px 2px;
+        }
+
+        .tab_btn {
+            height: 45px;
+            width: inherit;
+            border-color: #EDEDED;
+            font-weight: bold;
+        }
+        .tab_btn:hover{
+            background-color: cornsilk;
+        }
+
+        #contents01 {
+            /*width: 1200px;*/
+            display: grid;
+            grid-auto-flow: column;
+            /*grid-auto-columns: minmax(100px, auto);*/
+            overflow: auto;
+            height: 100%;
+            justify-content: start;
+        }
+
+        .tb_col {
+            display: grid;
+            /*width: 120px;*/
+            background-color: #ffffff;
+        }
+
+        .tb_header {
+            border: 1px solid #ededed;
+            height: 30px;
+            text-align: center;
+            width: 100%;
+        }
+        .tb_body{
+            border: 1px solid #ededed;
+            height: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .GRP_FX_A{
+            position: sticky;
+            left: 0;
+        }
+
+        #contents01>div{
+            min-width: 120px;
+        }
+
+        .GRP_IF_JOB, .GRP_IF_CODE{
+            text-align: left;
+        }
+
+    </style>
+    <script>
+        function init(){
+            document.getElementById("ipbCharNm").value = "용투팜~ 버프팜~ 큐어팜~";
+            document.getElementById("ipbApikey").value = "DU248VnsiGXAMbUiNE5P6U1DOdMgncd1";
+
+            onclick_tab('GRP_IF', 'A');
+
+            transServer(0, "프레이");
+
+            getContentsId("GRP_KJ");
+        }
+        /////////////////////공통부분//////////////
+        var serverList = [
+               {
+                "serverId": "cain",
+                "serverName": "카인"
+            }, {
+                "serverId": "diregie",
+                "serverName": "디레지에"
+            }, {
+                "serverId": "siroco",
+                "serverName": "시로코"
+            }, {
+                "serverId": "prey",
+                "serverName": "프레이"
+            }, {
+                "serverId": "casillas",
+                "serverName": "카시야스"
+            }, {
+                "serverId": "hilder",
+                "serverName": "힐더"
+            }, {
+                "serverId": "anton",
+                "serverName": "안톤"
+            }, {
+                "serverId": "bakal",
+                "serverName": "바칼"
+            }
+        ];
+
+        //서버한글 -> 영문명으로 변환
+        function transServer(seq, serverName) {
+            var a1 = serverList.filter(data => data["serverName"] == serverName);
+            var res = a1[0].serverId;
+            return res;
+        }
+
+        //탭구분배열
+        //input : GRP_KJ
+        //output : [GRP_KJ_WEAPON, GRP_KJ_JACKET, GRP_KJ_SHOULDER, ...]
+        function getContentsId(id){
+            var contentsArry = document.getElementById("contents01").children;
+            var resArry = new Array();
+            for(var i = 0; i < contentsArry.length; i++){
+                var a1 = contentsArry[i].getAttribute('id');
+                if(a1.startsWith(id)){
+                    resArry.push(a1);
+                }
+            }
+            return resArry;
+        }
+
+        //input : GRP_KJ_WEAPON
+        //output :  [GRP_KJ_WEAPON_1, GRP_KJ_WEAPON_2, GRP_KJ_WEAPON_3, ...]
+        function setChildren(seq, id, txt){
+            var a1 = document.getElementById(id).children;
+            a1[seq].innerHTML = txt;
+        }
+
+        /*
+        * obj :
+        * optK : 조건key값
+        * optV : 조건value값
+        * resK : 결과key값
+        * */
+        function findTxt(obj, optK, optV, resK){
+            var a1 = obj.filter(data => data[optK] == optV);
+            var resV = a1[0][resK];
+            return resV;
+        }
+
+        /*
+        * opt1 : 힘지체정           amplificationName
+        * opt2 : 강화or증폭 수치     reinforce
+        * */
+        function mkReinforce(amplificationName, reinforce){
+            var res = "";
+
+            if(amplificationName == null){
+                //강화
+                res += reinforce + "강";
+            }else if(amplificationName != null){
+                //증폭
+                res += amplificationName.slice(4, 5) + " " + reinforce + "증";
+            }
+
+            return res;
+        }
+
+        /**
+         *
+         * @param fusionOption  각인
+         * @param upgradeInfo   융합석명
+         */
+        function mkFusion(fusionOption, upgradeInfo){
+            var res = "";
+            var tmp = "";
+            var optArry = new Array();
+
+            if(upgradeInfo != null){
+                res += upgradeInfo.itemName;
+            }
+
+            if(fusionOption != null){
+                var options = fusionOption.options;
+                res += "[";
+                for(var i = 0; i < options.length; i++){
+                    if(options[i].hasOwnProperty("engrave")){
+                        tmp = options[i].engrave;
+                        optArry[i] = tmp.value;
+                    }else{
+                        optArry[i] = 0;
+                    }
+                    res += optArry[i];
+                    if(i != Number(options.length-1)){
+                        res += "/";
+                    }
+                }
+                res +=  "]";
+            }
+            return res;
+        }
+
+        /**
+         *
+         * @param enchant  마법부여obj
+         */
+        function mkEnchant(enchant){
+
+        }
+
+
+
+        /////////////////////////////////////////
+
+
+        //탭 선택
+        function onclick_tab(id, opt){
+            var contentsArry = document.getElementById("contents01").children;
+            for(var i = 0; i < contentsArry.length; i++){
+                var a1 = contentsArry[i].getAttribute('id');
+                if(a1.startsWith("GRP_FX_")){
+                    continue;
+                }
+                document.getElementById(a1).style.display = "none";
+            }
+            //document.getElementById("GRP_SM_SAMPLE").style.display = "block";
+
+            var visibleArry = document.getElementsByClassName(id + "_" + opt);
+            for(var i = 0; i < visibleArry.length; i++){
+                document.getElementById(visibleArry[i].getAttribute('id')).style.display = "block";
+            }
+        }
+
+        //헤더의 추가버튼클릭 - 캐릭터 및 그리드 세팅
+        function onclick_add(){
+            //apikey
+            var apikey = document.getElementById("ipbApikey").value;
+            //캐릭터 배열
+            var charNmArry = document.getElementById("ipbCharNm").value.split(" ");
+
+            var cmbServer = document.getElementById("cmbServer");
+            //서버 value
+            var serverId = cmbServer.value;
+            //서버 label
+            var serverName = cmbServer.options[cmbServer.selectedIndex].text;
+
+            if(apikey == ""){
+                alert("apikey를 입력해주세요!");
+                document.getElementById("ipbApikey").focus();
+                return 0;
+            }
+
+            if(charNmArry == ""){
+                alert("캐릭터명을 입력해주세요!");
+                document.getElementById("ipbCharNm").focus();
+                return 0;
+            }
+            //컨텐츠 배열
+            var contentsArry = document.getElementById("contents01").children;
+
+            //그리드 생성
+            for(var i = 0; i < charNmArry.length; i++){
+                for(var j = 0; j < contentsArry.length; j++){
+                    var a1 = contentsArry[j].getAttribute('id');
+                    var txt = "";
+                    txt += '<div class=\"tb_body ' + a1 + '\" id=' + a1 + '_' + Number(i+1) + ' >';
+                    if(a1 == "GRP_FX_SEQ"){
+                        txt += Number(i+1);
+                    }
+                    if(a1 == "GRP_FX_SERVER"){
+                        txt += serverName;
+                    }
+                    if(a1 == "GRP_FX_CHARNM"){
+                        txt += charNmArry[i];
+                    }
+                    txt += '</div>';
+                    document.getElementById(a1).insertAdjacentHTML('beforeend', txt);
+                }
+            }
+        }
+
+        //조회버튼 클릭
+        function onclick_doSearch(){
+            var a1 = document.getElementById("GRP_FX_SEQ").children;
+            var b1 = document.getElementById("GRP_FX_SERVER").children;
+            var c1 = document.getElementById("GRP_FX_CHARNM").children;
+
+            //row개수 구해서 for문 돌리기
+            for(var i = 0; i < a1.length; i++){
+                if(i == 0){
+                    continue;
+                }
+                var seq = i;
+                var serverName = b1[i].innerHTML;
+                var characterName = c1[i].innerHTML;
+
+                searchGRP_IF(seq, serverName, characterName);
+            }
+        }
+
+        /* 기본정보 조회
+         * seq : 순번
+         * serverName : 서버명 ex) 프레이
+         * characterName : 캐릭터명 ex) 버프팜~
+         * opt : 구분자
+         */
+        function searchGRP_IF(seq, serverName, characterName, opt){
+            var url = "https://api.neople.co.kr/df/servers/";
+                url += transServer(seq, serverName);
+                url += "/characters?characterName=";
+                url += encodeURIComponent(characterName);
+                url += "&apikey=";
+                url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+                //직업
+                var jobGrowName = a1.rows[0].jobGrowName;
+                //명성
+                var fame = a1.rows[0].fame;
+                //고유코드
+                var characterId = a1.rows[0].characterId;
+
+                setChildren(seq, "GRP_IF_JOB", jobGrowName);
+                setChildren(seq, "GRP_IF_FAME", fame);
+                setChildren(seq, "GRP_IF_CODE", characterId);
+
+                searchEquipment(seq, serverName, characterId, opt);
+            }
+        }
+
+        /* 장착장비 조회 -강화/증폭, 융합석[각인], 마법부여
+         * seq : 순번
+         * serverName : 서버명 ex) 프레이
+         * characterId : 캐릭터고유코드 ex) 06cac447998772~~~~~
+         * opt : 구분자
+         */
+        function searchEquipment(seq, serverName, characterId, opt){
+            var url = "https://api.neople.co.kr/df/servers/";
+                url += transServer(seq,serverName);
+                url += "/characters/";
+                url += characterId;
+                url += "/equip/equipment?apikey=";
+                url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+                var b1 = a1.equipment;
+
+                //강화증폭
+                setChildren(seq, "GRP_KJ_WEAPON",       mkReinforce(findTxt(b1, "slotId", "WEAPON",     "amplificationName"), findTxt(b1, "slotId", "WEAPON",       "reinforce")));
+                setChildren(seq, "GRP_KJ_JACKET",       mkReinforce(findTxt(b1, "slotId", "JACKET",     "amplificationName"), findTxt(b1, "slotId", "JACKET",       "reinforce")));
+                setChildren(seq, "GRP_KJ_SHOULDER",     mkReinforce(findTxt(b1, "slotId", "SHOULDER",   "amplificationName"), findTxt(b1, "slotId", "SHOULDER",     "reinforce")));
+                setChildren(seq, "GRP_KJ_PANTS",        mkReinforce(findTxt(b1, "slotId", "PANTS",      "amplificationName"), findTxt(b1, "slotId", "PANTS",        "reinforce")));
+                setChildren(seq, "GRP_KJ_SHOES",        mkReinforce(findTxt(b1, "slotId", "SHOES",      "amplificationName"), findTxt(b1, "slotId", "SHOES",        "reinforce")));
+                setChildren(seq, "GRP_KJ_WAIST",        mkReinforce(findTxt(b1, "slotId", "WAIST",      "amplificationName"), findTxt(b1, "slotId", "WAIST",        "reinforce")));
+                setChildren(seq, "GRP_KJ_AMULET",       mkReinforce(findTxt(b1, "slotId", "AMULET",     "amplificationName"), findTxt(b1, "slotId", "AMULET",       "reinforce")));
+                setChildren(seq, "GRP_KJ_WRIST",        mkReinforce(findTxt(b1, "slotId", "WRIST",      "amplificationName"), findTxt(b1, "slotId", "WRIST",        "reinforce")));
+                setChildren(seq, "GRP_KJ_RING",         mkReinforce(findTxt(b1, "slotId", "RING",       "amplificationName"), findTxt(b1, "slotId", "RING",         "reinforce")));
+                setChildren(seq, "GRP_KJ_SUPPORT",      mkReinforce(findTxt(b1, "slotId", "SUPPORT",    "amplificationName"), findTxt(b1, "slotId", "SUPPORT",      "reinforce")));
+                setChildren(seq, "GRP_KJ_MAGIC_STON",   mkReinforce(findTxt(b1, "slotId", "MAGIC_STON", "amplificationName"), findTxt(b1, "slotId", "MAGIC_STON",   "reinforce")));
+                setChildren(seq, "GRP_KJ_EARRING",      mkReinforce(findTxt(b1, "slotId", "EARRING",    "amplificationName"), findTxt(b1, "slotId", "EARRING",      "reinforce")));
+
+                //융합석
+                setChildren(seq, "GRP_UK_WEAPON",       mkFusion(findTxt(b1, "slotId", "WEAPON",     "fusionOption"), findTxt(b1, "slotId", "WEAPON",       "upgradeInfo")));
+                setChildren(seq, "GRP_UK_JACKET",       mkFusion(findTxt(b1, "slotId", "JACKET",     "fusionOption"), findTxt(b1, "slotId", "JACKET",       "upgradeInfo")));
+                setChildren(seq, "GRP_UK_SHOULDER",     mkFusion(findTxt(b1, "slotId", "SHOULDER",   "fusionOption"), findTxt(b1, "slotId", "SHOULDER",     "upgradeInfo")));
+                setChildren(seq, "GRP_UK_PANTS",        mkFusion(findTxt(b1, "slotId", "PANTS",      "fusionOption"), findTxt(b1, "slotId", "PANTS",        "upgradeInfo")));
+                setChildren(seq, "GRP_UK_SHOES",        mkFusion(findTxt(b1, "slotId", "SHOES",      "fusionOption"), findTxt(b1, "slotId", "SHOES",        "upgradeInfo")));
+                setChildren(seq, "GRP_UK_WAIST",        mkFusion(findTxt(b1, "slotId", "WAIST",      "fusionOption"), findTxt(b1, "slotId", "WAIST",        "upgradeInfo")));
+                setChildren(seq, "GRP_UK_AMULET",       mkFusion(findTxt(b1, "slotId", "AMULET",     "fusionOption"), findTxt(b1, "slotId", "AMULET",       "upgradeInfo")));
+                setChildren(seq, "GRP_UK_WRIST",        mkFusion(findTxt(b1, "slotId", "WRIST",      "fusionOption"), findTxt(b1, "slotId", "WRIST",        "upgradeInfo")));
+                setChildren(seq, "GRP_UK_RING",         mkFusion(findTxt(b1, "slotId", "RING",       "fusionOption"), findTxt(b1, "slotId", "RING",         "upgradeInfo")));
+                setChildren(seq, "GRP_UK_SUPPORT",      mkFusion(findTxt(b1, "slotId", "SUPPORT",    "fusionOption"), findTxt(b1, "slotId", "SUPPORT",      "upgradeInfo")));
+                setChildren(seq, "GRP_UK_MAGIC_STON",   mkFusion(findTxt(b1, "slotId", "MAGIC_STON", "fusionOption"), findTxt(b1, "slotId", "MAGIC_STON",   "upgradeInfo")));
+                setChildren(seq, "GRP_UK_EARRING",      mkFusion(findTxt(b1, "slotId", "EARRING",    "fusionOption"), findTxt(b1, "slotId", "EARRING",      "upgradeInfo")));
+
+                //마법부여
+                // setChildren(seq, "GRP_UK_WEAPON",       mkEnchant(findTxt(b1, "slotId", "WEAPON",     "enchant"), findTxt(b1, "slotId", "WEAPON",       "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_JACKET",       mkEnchant(findTxt(b1, "slotId", "JACKET",     "enchant"), findTxt(b1, "slotId", "JACKET",       "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_SHOULDER",     mkEnchant(findTxt(b1, "slotId", "SHOULDER",   "enchant"), findTxt(b1, "slotId", "SHOULDER",     "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_PANTS",        mkEnchant(findTxt(b1, "slotId", "PANTS",      "enchant"), findTxt(b1, "slotId", "PANTS",        "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_SHOES",        mkEnchant(findTxt(b1, "slotId", "SHOES",      "enchant"), findTxt(b1, "slotId", "SHOES",        "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_WAIST",        mkEnchant(findTxt(b1, "slotId", "WAIST",      "enchant"), findTxt(b1, "slotId", "WAIST",        "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_AMULET",       mkEnchant(findTxt(b1, "slotId", "AMULET",     "enchant"), findTxt(b1, "slotId", "AMULET",       "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_WRIST",        mkEnchant(findTxt(b1, "slotId", "WRIST",      "enchant"), findTxt(b1, "slotId", "WRIST",        "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_RING",         mkEnchant(findTxt(b1, "slotId", "RING",       "enchant"), findTxt(b1, "slotId", "RING",         "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_SUPPORT",      mkEnchant(findTxt(b1, "slotId", "SUPPORT",    "enchant"), findTxt(b1, "slotId", "SUPPORT",      "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_MAGIC_STON",   mkEnchant(findTxt(b1, "slotId", "MAGIC_STON", "enchant"), findTxt(b1, "slotId", "MAGIC_STON",   "upgradeInfo")));
+                // setChildren(seq, "GRP_UK_EARRING",      mkEnchant(findTxt(b1, "slotId", "EARRING",    "enchant"), findTxt(b1, "slotId", "EARRING",      "upgradeInfo")));
+
+            }
+        }
+    </script>
+</head>
+<body onload="init();">
+<div style="height: 60px;">
+    <h1>던파용병단</h1>
+</div>
+<div class="header" style="display: none;">
+    <div style="width: 100px;">APIKEY</div>
+    <div style="flex-grow: 1"><input id="ipbApikey" style="" type="text" placeholder=""></div>
+</div>
+
+<div class="header">
+    <div style="width: 100px;">서버</div>
+    <div style="width: 130px;">
+        <select id="cmbServer" style="width: 100%; height: 30px">
+            <option value="prey">프레이</option>
+            <option value="cain">카인</option>
+            <option value="diregie">디레지에</option>
+            <option value="siroco">시로코</option>
+            <option value="casillas">카시야스</option>
+            <option value="hilder">힐더</option>
+            <option value="anton">안톤</option>
+            <option value="bakal">바칼</option>
+        </select>
+    </div>
+    <div style="width: 100px">캐릭터명</div>
+    <div style="flex-grow: 1;"><input type="text" id="ipbCharNm" style="width: 100%" placeholder="캐릭터명을 %로 구분해주세요.ex)퇴마사%어벤져%크리에이터"></div>
+    <div style=""><button type="button" style="height: 100%;" onclick="onclick_add()">추가</button> </div>
+    <div style=""><button type="button" style="height: 100%;" onclick="onclick_doSearch()">조회</button> </div>
+</div>
+
+<div id="subTitle">
+    <h3>전체목록</h3>
+</div>
+<div id="tab">
+    <div class="tab_row">
+        <button class="tab_btn tab_if" type="button" id="TAB_BTN_IF_A" onclick="onclick_tab('GRP_IF', 'A');">기본정보</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_kj" type="button" id="TAB_BTN_KJ_A" onclick="onclick_tab('GRP_KJ', 'A');">강화/증폭<br>무기/방어구</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_kj" type="button" id="TAB_BTN_KJ_B" onclick="onclick_tab('GRP_KJ', 'B');">강화/증폭<br>악세/특장</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_uk" type="button" id="TAB_BTN_UK_A" onclick="onclick_tab('GRP_UK', 'A');">융합석[각인]<br>무기/방어구</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_uk" type="button" id="TAB_BTN_UK_B" onclick="onclick_tab('GRP_UK', 'B');">융합석[각인]<br>악세/특장</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_mb" type="button" id="TAB_BTN_MB_A" onclick="onclick_tab('GRP_MB', 'A');">마법부여<br>무기/방어구</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_mb" type="button" id="TAB_BTN_MB_B" onclick="onclick_tab('GRP_MB', 'B');">마법부여<br>악세/특장</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_av" type="button" id="TAB_BTN_AV_A" onclick="onclick_tab('GRP_AV', 'A');">아바타</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_cr" type="button" id="TAB_BTN_CR_A" onclick="onclick_tab('GRP_CR', 'A');">크리쳐</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_bg" type="button" id="TAB_BTN_BG_A" onclick="onclick_tab('GRP_BG', 'A');">버프강화</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_sp" type="button" id="TAB_BTN_SP_A" onclick="onclick_tab('GRP_SP', 'A');">시에오칭</button>
+    </div>
+    <div class="tab_row">
+        <button class="tab_btn tab_sp" type="button" id="TAB_BTN_SP_B" onclick="onclick_tab('GRP_SP', 'B');">딜플티</button>
+    </div>
+</div>
+
+<div class="contents" id="contents01">
+    <!--샘플 시작-->
+<!--    <div class="tb_col"  id='GRP_SM_SAMPLE' style="">-->
+<!--        <script>-->
+<!--            document.write("<div class='tb_header' style='height: 30px;'>" + "샘플" + "</div>");-->
+<!--            for (var i = 0; i < 20; i++) {-->
+<!--                document.write("<div class='tb_body' style='height: 30px;'>" + Number(i + 1) + "</div>");-->
+
+<!--            }-->
+<!--        </script>-->
+<!--    </div>-->
+    <!--샘플 시작-->
+
+    <!--고정부분 시작-->
+    <div class="tb_col GRP_FX_A" id="GRP_FX_SEQ" style="">
+        <div class="tb_header">순번</div>
+    </div>
+    <div class="tb_col GRP_FX_A" id="GRP_FX_SERVER" style="">
+        <div class="tb_header">서버</div>
+    </div>
+    <div class="tb_col GRP_FX_A" id="GRP_FX_CHARNM" style="">
+        <div class="tb_header">캐릭터명</div>
+    </div>
+    <!--고정부분 끝-->
+
+    <!--기본정보 시작-->
+    <div class="tb_col GRP_IF_A" id="GRP_IF_JOB" style="">
+        <div class="tb_header">직업</div>
+    </div>
+    <div class="tb_col GRP_IF_A" id="GRP_IF_FAME" style="">
+        <div class="tb_header">명성</div>
+    </div>
+    <div class="tb_col GRP_IF_A" id="GRP_IF_CODE" style="width: 400px;">
+        <div class="tb_header">고유코드</div>
+    </div>
+    <!--기본정보 끝-->
+
+    <!--강화/증폭-무기/방어구 시작-->
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_WEAPON" style="">
+        <div class="tb_header">무기</div>
+    </div>
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_JACKET" style="">
+        <div class="tb_header">상의</div>
+    </div>
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_SHOULDER" style="">
+        <div class="tb_header">머리어깨</div>
+    </div>
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_PANTS" style="">
+        <div class="tb_header">하의</div>
+    </div>
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_SHOES" style="">
+        <div class="tb_header">신발</div>
+    </div>
+    <div class="tb_col GRP_KJ_A" id="GRP_KJ_WAIST" style="">
+        <div class="tb_header">벨트</div>
+    </div>
+    <!--강화/증폭-무기/방어구 끝-->
+
+    <!--강화/증폭-악세/특장 시작-->
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_AMULET" style="">
+        <div class="tb_header">목걸이</div>
+    </div>
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_WRIST" style="">
+        <div class="tb_header">팔찌</div>
+    </div>
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_RING" style="">
+        <div class="tb_header">반지</div>
+    </div>
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_SUPPORT" style="">
+        <div class="tb_header">보조장비</div>
+    </div>
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_MAGIC_STON" style="">
+        <div class="tb_header">마법석</div>
+    </div>
+    <div class="tb_col GRP_KJ_B" id="GRP_KJ_EARRING" style="">
+        <div class="tb_header">귀걸이</div>
+    </div>
+    <!--강화/증폭-악세/특장 끝-->
+
+    <!--융합석[각인]-방어구 시작-->
+    <div class="tb_col GRP_UK_A" id="GRP_UK_WEAPON" style="width: 350px;">
+        <div class="tb_header">무기</div>
+    </div>
+    <div class="tb_col GRP_UK_A" id="GRP_UK_JACKET" style="width: 350px;">
+        <div class="tb_header">상의</div>
+    </div>
+    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOULDER" style="width: 350px;">
+        <div class="tb_header">머리어깨</div>
+    </div>
+    <div class="tb_col GRP_UK_A" id="GRP_UK_PANTS" style="width: 350px;">
+        <div class="tb_header">하의</div>
+    </div>
+    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOES" style="width: 350px;">
+        <div class="tb_header">신발</div>
+    </div>
+    <div class="tb_col GRP_UK_A" id="GRP_UK_WAIST" style="width: 350px;">
+        <div class="tb_header">벨트</div>
+    </div>
+    <!--융합석[각인]-방어구 끝-->
+
+    <!--융합석[각인]-악세/특장 시작-->
+    <div class="tb_col GRP_UK_B" id="GRP_UK_AMULET" style="width: 350px;">
+        <div class="tb_header">목걸이</div>
+    </div>
+    <div class="tb_col GRP_UK_B" id="GRP_UK_WRIST" style="width: 350px;">
+        <div class="tb_header">팔찌</div>
+    </div>
+    <div class="tb_col GRP_UK_B" id="GRP_UK_RING" style="width: 350px;">
+        <div class="tb_header">반지</div>
+    </div>
+    <div class="tb_col GRP_UK_B" id="GRP_UK_SUPPORT" style="width: 350px;">
+        <div class="tb_header">보조장비</div>
+    </div>
+    <div class="tb_col GRP_UK_B" id="GRP_UK_MAGIC_STON" style="width: 350px;">
+        <div class="tb_header">마법석</div>
+    </div>
+    <div class="tb_col GRP_UK_B" id="GRP_UK_EARRING" style="width: 350px;">
+        <div class="tb_header">귀걸이</div>
+    </div>
+    <!--융합석[각인]-악세/특장 끝-->
+
+    <!--마법부여-무기/방어구 시작-->
+    <div class="tb_col GRP_MB_A" id="GRP_MB_WEAPON" style="">
+        <div class="tb_header">무기</div>
+    </div>
+    <div class="tb_col GRP_MB_A" id="GRP_MB_JACKET" style="">
+        <div class="tb_header">상의</div>
+    </div>
+    <div class="tb_col GRP_MB_A" id="GRP_MB_SHOULDER" style="">
+        <div class="tb_header">머리어깨</div>
+    </div>
+    <div class="tb_col GRP_MB_A" id="GRP_MB_PANTS" style="">
+        <div class="tb_header">하의</div>
+    </div>
+    <div class="tb_col GRP_MB_A" id="GRP_MB_SHOES" style="">
+        <div class="tb_header">신발</div>
+    </div>
+    <div class="tb_col GRP_MB_A" id="GRP_MB_WAIST" style="">
+        <div class="tb_header">벨트</div>
+    </div>
+    <!--마법부여-방어구 끝-->
+
+    <!--마법부여-악세/특장 시작-->
+    <div class="tb_col GRP_MB_B" id="GRP_MB_AMULET" style="">
+        <div class="tb_header">목걸이</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_WRIST" style="">
+        <div class="tb_header">팔찌</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_RING" style="">
+        <div class="tb_header">반지</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_SUPPORT" style="">
+        <div class="tb_header">보조장비</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_MAGIC_STON" style="">
+        <div class="tb_header">마법석</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_EARRING" style="">
+        <div class="tb_header">귀걸이</div>
+    </div>
+    <div class="tb_col GRP_MB_B" id="GRP_MB_TITLE" style="">
+        <div class="tb_header">칭호</div>
+    </div>
+    <!--마법부여-악세/특장 끝-->
+
+    <!--아바타 시작-->
+    <div class="tb_col GRP_AV_A" id="GRP_AV_HEADGEAR" style="">
+        <div class="tb_header">모자</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_HAIR" style="">
+        <div class="tb_header">머리</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_FACE" style="">
+        <div class="tb_header">얼굴</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_JACKET" style="">
+        <div class="tb_header">상의</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_PANTS" style="">
+        <div class="tb_header">하의</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_SHOES" style="">
+        <div class="tb_header">신발</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_BREAST" style="">
+        <div class="tb_header">목가슴</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_WAIST" style="">
+        <div class="tb_header">허리</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_SKIN" style="">
+        <div class="tb_header">스킨</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_AURORA" style="">
+        <div class="tb_header">오라</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_WEAPON" style="">
+        <div class="tb_header">무기</div>
+    </div>
+    <div class="tb_col GRP_AV_A" id="GRP_AV_AURA_SKIN" style="">
+        <div class="tb_header">오라 스킨</div>
+    </div>
+    <!--아바타 끝-->
+
+    <!--크리쳐 시작-->
+    <div class="tb_col GRP_CR_A" id="GRP_CR_CREATURE" style="">
+        <div class="tb_header">크리쳐</div>
+    </div>
+    <div class="tb_col GRP_CR_A" id="GRP_CR_RED_ARTIFACT" style="">
+        <div class="tb_header">스킨</div>
+    </div>
+    <div class="tb_col GRP_CR_A" id="GRP_CR_BLUE_ARTIFACT" style="">
+        <div class="tb_header">오라</div>
+    </div>
+    <div class="tb_col GRP_CR_A" id="GRP_CR_GREEN_ARTIFACT" style="">
+        <div class="tb_header">무기</div>
+    </div>
+    <!--크리쳐 끝-->
+
+    <!--버프강화 시작-->
+    <div class="tb_col GRP_BG_A" id="GRP_BG_WEAPON" style="">
+        <div class="tb_header">무기</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_JACKET" style="">
+        <div class="tb_header">상의</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_SHOULDER" style="">
+        <div class="tb_header">머리어깨</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_PANTS" style="">
+        <div class="tb_header">하의</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_SHOES" style="">
+        <div class="tb_header">신발</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_WAIST" style="">
+        <div class="tb_header">벨트</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_AMULET" style="">
+        <div class="tb_header">목걸이</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_WRIST" style="">
+        <div class="tb_header">팔찌</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_RING" style="">
+        <div class="tb_header">반지</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_SUPPORT" style="">
+        <div class="tb_header">보조장비</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_MAGIC_STON" style="">
+        <div class="tb_header">마법석</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_EARRING" style="">
+        <div class="tb_header">귀걸이</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_TITLE" style="">
+        <div class="tb_header">칭호</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_JACKET_A" style="">
+        <div class="tb_header">아바타 상의</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_PANTS_A" style="">
+        <div class="tb_header">아바타 하의</div>
+    </div>
+    <div class="tb_col GRP_BG_A" id="GRP_BG_CREATURE" style="">
+        <div class="tb_header">크리쳐</div>
+    </div>
+    <!--버프강화 끝-->
+</div>
+
+
+<!--강화/증폭-악세/특장 시작-->
+<!--강화/증폭-악세/특장 끝-->
+<!--강화/증폭-악세/특장 시작-->
+<!--강화/증폭-악세/특장 끝-->
+<!--강화/증폭-악세/특장 시작-->
+<!--강화/증폭-악세/특장 끝-->
+
+
+<!--</div>-->
+
+
+</body>
+</html>
