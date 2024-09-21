@@ -113,6 +113,7 @@
         function init(){
             // document.getElementById("ipbCharNm").value = "용투팜~ 버프팜~ 큐어팜~";
             document.getElementById("ipbApikey").value = "DU248VnsiGXAMbUiNE5P6U1DOdMgncd1";
+            document.getElementById("ipbAdvenName").value = "하스스톤용병단";
 
             onclick_tab('GRP_IF', 'A');
 
@@ -186,6 +187,44 @@
             var resV = a1[0][resK];
             return resV;
         }
+
+        /**
+         *
+         * @param adven : 모험단명
+         */
+        function getChacters(){
+            var advenName = document.getElementById("ipbAdvenName").value;
+
+            var url = "//dundam.xyz/search?server=adven&name="
+                url += encodeURIComponent(advenName)
+                //url += "&server=adven";
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.setRequestHeader("Accept", "application/json, text/plain, */*");
+            request.setRequestHeader("User-Accept-Encoding", "gzip, deflate, br, zstd");
+            request.setRequestHeader("User-Accept-Language", "ko-KR,ko;q=0.9");
+            // request.setRequestHeader("Connection", "keep-alive");
+            request.setRequestHeader("Content-Type", "application/json");
+            // request.setRequestHeader("Host", "dundam.xyz");
+            // request.setRequestHeader("Origin", "https://dundam.xyz");
+            // request.setRequestHeader("Sec-Fetch-Dest", "empty");
+            // request.setRequestHeader("Sec-Fetch-Mode", "cors");
+            // request.setRequestHeader("HSec-Fetch-Site", "same-origin");
+            // request.setRequestHeader("sec-ch-ua-platform", "Windows");
+            //request.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+            request.send();
+            request.onload = function () {
+                console.log(request.response);
+
+            }
+
+
+
+
+
+        }
+
 
         /*
         * opt1 : 힘지체정           amplificationName
@@ -465,6 +504,9 @@
     <div style="flex-grow: 1;"><input type="text" id="ipbCharNm" style="width: 100%" placeholder="캐릭터명을 공백으로 구분해주세요.ex)퇴마사 어벤져 크리에이터"></div>
     <div style=""><button type="button" style="height: 100%;" onclick="onclick_add()">추가</button> </div>
     <div style=""><button type="button" style="height: 100%;" onclick="onclick_doSearch()">조회</button> </div>
+</div>
+<div>
+    <div><input type="text" id="ipbAdvenName" style="width: 300px;"><button type="button" onclick="getChacters()">dd</button></div>
 </div>
 
 <div id="tab">
