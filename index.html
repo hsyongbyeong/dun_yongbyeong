@@ -72,7 +72,7 @@
             grid-auto-flow: column;
             /*grid-auto-columns: minmax(100px, auto);*/
             overflow: auto;
-            height: 100%;
+            height: 800px;
             justify-content: start;
         }
 
@@ -87,12 +87,18 @@
             height: 30px;
             text-align: center;
             width: 100%;
+            position: sticky;
+            top: 0;
+            background-color: cadetblue;
         }
         .tb_body{
             border: 1px solid #ededed;
-            height: 30px;
+            height: 90px;
             text-align: center;
             width: 100%;
+        }
+        .tb_body:nth-child(2n+1){
+            background-color: #dcdcdc;
         }
 
         .GRP_FX_A{
@@ -107,16 +113,32 @@
         .GRP_IF_JOB, .GRP_IF_CODE{
             text-align: left;
         }
+        .GRP_UK_A, .GRP_UK_B{
+            width: 350px;
+        }
+
+        .GRP_MB_A, .GRP_MB_B{
+            width: 430px;
+        }
+
+        .GRP_AV_A{
+            width: 430px;
+        }
+
+        .GRP_CR_A{
+            width: 350px;
+        }
+
+        .GRP_BG_A{
+            width: 430px;
+        }
 
     </style>
     <script>
         function init(){
-            // document.getElementById("ipbCharNm").value = "용투팜~ 버프팜~ 큐어팜~";
+
             document.getElementById("ipbApikey").value = "DU248VnsiGXAMbUiNE5P6U1DOdMgncd1";
-            document.getElementById("ipbAdvenName").value = "하스스톤용병단";
-
             onclick_tab('GRP_IF', 'A');
-
         }
         /////////////////////공통부분//////////////
         var serverList = [
@@ -183,48 +205,14 @@
         * resK : 결과key값
         * */
         function findTxt(obj, optK, optV, resK){
-            var a1 = obj.filter(data => data[optK] == optV);
-            var resV = a1[0][resK];
+            try{
+                var a1 = obj.filter(data => data[optK] == optV);
+                var resV = a1[0][resK];
+            }catch (e){
+                resV = "";
+            }
             return resV;
         }
-
-        /**
-         *
-         * @param adven : 모험단명
-         */
-        function getChacters(){
-            var advenName = document.getElementById("ipbAdvenName").value;
-
-            var url = "//dundam.xyz/search?server=adven&name="
-                url += encodeURIComponent(advenName)
-                //url += "&server=adven";
-
-            var request = new XMLHttpRequest();
-            request.open('GET', url, true);
-            request.setRequestHeader("Accept", "application/json, text/plain, */*");
-            request.setRequestHeader("User-Accept-Encoding", "gzip, deflate, br, zstd");
-            request.setRequestHeader("User-Accept-Language", "ko-KR,ko;q=0.9");
-            // request.setRequestHeader("Connection", "keep-alive");
-            request.setRequestHeader("Content-Type", "application/json");
-            // request.setRequestHeader("Host", "dundam.xyz");
-            // request.setRequestHeader("Origin", "https://dundam.xyz");
-            // request.setRequestHeader("Sec-Fetch-Dest", "empty");
-            // request.setRequestHeader("Sec-Fetch-Mode", "cors");
-            // request.setRequestHeader("HSec-Fetch-Site", "same-origin");
-            // request.setRequestHeader("sec-ch-ua-platform", "Windows");
-            //request.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-            request.send();
-            request.onload = function () {
-                console.log(request.response);
-
-            }
-
-
-
-
-
-        }
-
 
         /*
         * opt1 : 힘지체정           amplificationName
@@ -235,10 +223,12 @@
 
             if(amplificationName == null){
                 //강화
+                res += "<br>";
                 res += reinforce + "강";
             }else if(amplificationName != null){
                 //증폭
-                res += amplificationName.slice(4, 5) + " " + reinforce + "증";
+                // res += amplificationName.slice(4, 5) + " " + reinforce + "증";
+                res += amplificationName + "<br>" + reinforce + "증";
             }
 
             return res;
@@ -256,7 +246,9 @@
 
             if(upgradeInfo != null){
                 res += upgradeInfo.itemName;
+                res += "<br>";
             }
+
 
             if(fusionOption != null){
                 var options = fusionOption.options;
@@ -283,10 +275,122 @@
          * @param enchant  마법부여obj
          */
         function mkEnchant(enchant){
+            var res = "";
+            var tmp = "";
+            var optArry = new Array();
 
+            // status - 스텟
+            // reinforceSkill 강화스킬
+            if(enchant.hasOwnProperty("status")){
+                var statusArry = enchant.status;
+                for(var i = 0; i < statusArry.length; i++){
+                    res += statusArry[i].name + statusArry[i].value;
+                    if(i != Number(statusArry.length - 1)){
+                        res += "/";
+                    }
+                }
+            }
+            res += "<br>";
+
+            if(enchant.hasOwnProperty("reinforceSkill")){
+                var reinforceSkillArry = enchant.reinforceSkill;
+                // console.log("reinforceSkillArry : " + reinforceSkillArry);
+                for(var i = 0; i < reinforceSkillArry.length; i++){
+                    var skills = reinforceSkillArry[i].skills;
+                    for(var j = 0; j < skills.length; j++){
+                        res += skills[j].name + "+" +skills[j].value;
+                    }
+                    if(i != reinforceSkillArry.length - 1){
+                        res += "/";
+                    }
+                }
+            }
+
+            return res;
         }
 
+        function mkAvatar(itemName, optionAbility, emblems){
+            var res = "";
+            var tmp = new Array();
+            if(itemName != null){
+                //res += itemName;
+            }
+            // res += "<br>";
+            if(optionAbility != null){
+                res += optionAbility;
+            }
+            res += "<br>";
+            if(emblems != null) {
+                for (var i = 0; i < emblems.length; i++) {
+                    res += emblems[i].itemName;
+                    res += "<br>";
+                }
+            }
+            return res;
+        }
 
+        function mkCreature(artifact, itemRarity){
+            var res = "";
+            res += "[" + itemRarity + "]"
+            res += "<br>";
+            res += artifact;
+            return res;
+        }
+
+        function mkBuffA(itemName, itemRarity, enchant){
+            if(itemName == ""){
+                return null;
+            }
+            var res = "";
+            res += "[" + itemRarity + "]";
+            res += "<br>";
+            res += itemName;
+            res += "<br>";
+            if(enchant != null){
+                var a1 = enchant.reinforceSkill;
+
+                var b1 = "";
+                for(var i = 0; i < a1.length; i++){
+                    b1 = a1[i].skills;
+                    for(var j = 0; j < b1.length; j++){
+                        res += b1[j].name + "+" + b1[j].value;
+                    }
+
+                }
+            }
+            return res;
+        }
+
+        function mkBuffB(emblems, optionAbility, buffName){
+            var res = "";
+            if(optionAbility != null){
+                res += optionAbility;
+            }
+            res += "<br>";
+            if(emblems != null){
+                for(var i = 0; i < emblems.length; i++){
+                    if(emblems[i].itemName.includes(buffName)){
+                        res += emblems[i].itemName;
+                    }
+                }
+            }
+            return res;
+        }
+
+        function mkBuffC(skill){
+            var res = "";
+            var a1 = skill.buff;
+            var b1 = a1.creature;
+
+            for(var i = 0; i < b1.length; i++){
+                res += b1[i].itemName;
+                res += "<br>";
+                if(b1[i].enchant != null){
+                    res += b1[i].enchant;
+                }
+            }
+            return res;
+        }
 
         /////////////////////////////////////////
 
@@ -336,14 +440,18 @@
             //컨텐츠 배열
             var contentsArry = document.getElementById("contents01").children;
 
+            //그리드 생성전 개수
+            var seq = document.getElementById("GRP_FX_SEQ").children.length;
+
             //그리드 생성
             for(var i = 0; i < charNmArry.length; i++){
                 for(var j = 0; j < contentsArry.length; j++){
                     var a1 = contentsArry[j].getAttribute('id');
                     var txt = "";
-                    txt += '<div class=\"tb_body ' + a1 + '\" id=' + a1 + '_' + Number(i+1) + ' >';
+
+                    txt += '<div class=\"tb_body ' + a1 + '\" id=' + a1 + '_' + seq + ' >';
                     if(a1 == "GRP_FX_SEQ"){
-                        txt += Number(i+1);
+                        txt += seq;
                     }
                     if(a1 == "GRP_FX_SERVER"){
                         txt += serverName;
@@ -354,6 +462,7 @@
                     txt += '</div>';
                     document.getElementById(a1).insertAdjacentHTML('beforeend', txt);
                 }
+                seq++;
             }
         }
 
@@ -418,7 +527,7 @@
          */
         function searchEquipment(seq, serverName, characterId, opt){
             var url = "https://api.neople.co.kr/df/servers/";
-                url += transServer(seq,serverName);
+                url += transServer(seq, serverName);
                 url += "/characters/";
                 url += characterId;
                 url += "/equip/equipment?apikey=";
@@ -460,19 +569,168 @@
                 setChildren(seq, "GRP_UK_EARRING",      mkFusion(findTxt(b1, "slotId", "EARRING",    "fusionOption"), findTxt(b1, "slotId", "EARRING",      "upgradeInfo")));
 
                 //마법부여
-                // setChildren(seq, "GRP_UK_WEAPON",       mkEnchant(findTxt(b1, "slotId", "WEAPON",     "enchant"), findTxt(b1, "slotId", "WEAPON",       "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_JACKET",       mkEnchant(findTxt(b1, "slotId", "JACKET",     "enchant"), findTxt(b1, "slotId", "JACKET",       "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_SHOULDER",     mkEnchant(findTxt(b1, "slotId", "SHOULDER",   "enchant"), findTxt(b1, "slotId", "SHOULDER",     "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_PANTS",        mkEnchant(findTxt(b1, "slotId", "PANTS",      "enchant"), findTxt(b1, "slotId", "PANTS",        "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_SHOES",        mkEnchant(findTxt(b1, "slotId", "SHOES",      "enchant"), findTxt(b1, "slotId", "SHOES",        "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_WAIST",        mkEnchant(findTxt(b1, "slotId", "WAIST",      "enchant"), findTxt(b1, "slotId", "WAIST",        "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_AMULET",       mkEnchant(findTxt(b1, "slotId", "AMULET",     "enchant"), findTxt(b1, "slotId", "AMULET",       "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_WRIST",        mkEnchant(findTxt(b1, "slotId", "WRIST",      "enchant"), findTxt(b1, "slotId", "WRIST",        "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_RING",         mkEnchant(findTxt(b1, "slotId", "RING",       "enchant"), findTxt(b1, "slotId", "RING",         "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_SUPPORT",      mkEnchant(findTxt(b1, "slotId", "SUPPORT",    "enchant"), findTxt(b1, "slotId", "SUPPORT",      "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_MAGIC_STON",   mkEnchant(findTxt(b1, "slotId", "MAGIC_STON", "enchant"), findTxt(b1, "slotId", "MAGIC_STON",   "upgradeInfo")));
-                // setChildren(seq, "GRP_UK_EARRING",      mkEnchant(findTxt(b1, "slotId", "EARRING",    "enchant"), findTxt(b1, "slotId", "EARRING",      "upgradeInfo")));
+                setChildren(seq, "GRP_MB_TITLE",        mkEnchant(findTxt(b1, "slotId", "TITLE",      "enchant")));
+                setChildren(seq, "GRP_MB_WEAPON",       mkEnchant(findTxt(b1, "slotId", "WEAPON",     "enchant")));
+                setChildren(seq, "GRP_MB_JACKET",       mkEnchant(findTxt(b1, "slotId", "JACKET",     "enchant")));
+                setChildren(seq, "GRP_MB_SHOULDER",     mkEnchant(findTxt(b1, "slotId", "SHOULDER",   "enchant")));
+                setChildren(seq, "GRP_MB_PANTS",        mkEnchant(findTxt(b1, "slotId", "PANTS",      "enchant")));
+                setChildren(seq, "GRP_MB_SHOES",        mkEnchant(findTxt(b1, "slotId", "SHOES",      "enchant")));
+                setChildren(seq, "GRP_MB_WAIST",        mkEnchant(findTxt(b1, "slotId", "WAIST",      "enchant")));
+                setChildren(seq, "GRP_MB_AMULET",       mkEnchant(findTxt(b1, "slotId", "AMULET",     "enchant")));
+                setChildren(seq, "GRP_MB_WRIST",        mkEnchant(findTxt(b1, "slotId", "WRIST",      "enchant")));
+                setChildren(seq, "GRP_MB_RING",         mkEnchant(findTxt(b1, "slotId", "RING",       "enchant")));
+                setChildren(seq, "GRP_MB_SUPPORT",      mkEnchant(findTxt(b1, "slotId", "SUPPORT",    "enchant")));
+                setChildren(seq, "GRP_MB_MAGIC_STON",   mkEnchant(findTxt(b1, "slotId", "MAGIC_STON", "enchant")));
+                setChildren(seq, "GRP_MB_EARRING",      mkEnchant(findTxt(b1, "slotId", "EARRING",    "enchant")));
 
+                //아바타검색
+                searchAvatar(seq, serverName, characterId, opt);
+            }
+        }
+
+        function searchAvatar(seq, serverName, characterId, opt){
+            var url = "https://api.neople.co.kr/df/servers/";
+                url += transServer(seq, serverName);
+                url += "/characters/";
+                url += characterId;
+                url += "/equip/avatar?apikey=";
+                url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+                var b1 = a1.avatar;
+                //itemName": "레어 모자 클론 아바타"
+                //optionAbility": "캐스팅 속도 14.0% 증가"
+                //emblems[n] - "itemName": "화려한 그린 엠블렘[체력]", "itemName": "플래티넘 엠블렘[수호의 은총]"
+                setChildren(seq, "GRP_AV_HEADGEAR",     mkAvatar(findTxt(b1, "slotId", "HEADGEAR",  "itemName"), findTxt(b1, "slotId", "HEADGEAR",  "optionAbility"), findTxt(b1, "slotId", "HEADGEAR",  "emblems")));
+                setChildren(seq, "GRP_AV_HAIR",         mkAvatar(findTxt(b1, "slotId", "HAIR",      "itemName"), findTxt(b1, "slotId", "HAIR",      "optionAbility"), findTxt(b1, "slotId", "HAIR",      "emblems")));
+                setChildren(seq, "GRP_AV_FACE",         mkAvatar(findTxt(b1, "slotId", "FACE",      "itemName"), findTxt(b1, "slotId", "FACE",      "optionAbility"), findTxt(b1, "slotId", "FACE",      "emblems")));
+                setChildren(seq, "GRP_AV_JACKET",       mkAvatar(findTxt(b1, "slotId", "JACKET",    "itemName"), findTxt(b1, "slotId", "JACKET",    "optionAbility"), findTxt(b1, "slotId", "JACKET",    "emblems")));
+                setChildren(seq, "GRP_AV_PANTS",        mkAvatar(findTxt(b1, "slotId", "PANTS",     "itemName"), findTxt(b1, "slotId", "PANTS",     "optionAbility"), findTxt(b1, "slotId", "PANTS",     "emblems")));
+                setChildren(seq, "GRP_AV_SHOES",        mkAvatar(findTxt(b1, "slotId", "SHOES",     "itemName"), findTxt(b1, "slotId", "SHOES",     "optionAbility"), findTxt(b1, "slotId", "SHOES",     "emblems")));
+                setChildren(seq, "GRP_AV_BREAST",       mkAvatar(findTxt(b1, "slotId", "BREAST",    "itemName"), findTxt(b1, "slotId", "BREAST",    "optionAbility"), findTxt(b1, "slotId", "BREAST",    "emblems")));
+                setChildren(seq, "GRP_AV_WAIST",        mkAvatar(findTxt(b1, "slotId", "WAIST",     "itemName"), findTxt(b1, "slotId", "WAIST",     "optionAbility"), findTxt(b1, "slotId", "WAIST",     "emblems")));
+                setChildren(seq, "GRP_AV_SKIN",         mkAvatar(findTxt(b1, "slotId", "SKIN",      "itemName"), findTxt(b1, "slotId", "SKIN",      "optionAbility"), findTxt(b1, "slotId", "SKIN",      "emblems")));
+                setChildren(seq, "GRP_AV_AURORA",       mkAvatar(findTxt(b1, "slotId", "AURORA",    "itemName"), findTxt(b1, "slotId", "AURORA",    "optionAbility"), findTxt(b1, "slotId", "AURORA",    "emblems")));
+                setChildren(seq, "GRP_AV_WEAPON",       mkAvatar(findTxt(b1, "slotId", "WEAPON",    "itemName"), findTxt(b1, "slotId", "WEAPON",    "optionAbility"), findTxt(b1, "slotId", "WEAPON",    "emblems")));
+                setChildren(seq, "GRP_AV_AURA_SKIN",    mkAvatar(findTxt(b1, "slotId", "AURA_SKIN", "itemName"), findTxt(b1, "slotId", "AURA_SKIN", "optionAbility"), findTxt(b1, "slotId", "AURA_SKIN", "emblems")));
+
+                //아바타검색
+                searchCreature(seq, serverName, characterId, opt);
+            }
+
+            function searchCreature(seq, serverName, characterId, opt){
+                var url = "https://api.neople.co.kr/df/servers/";
+                url += transServer(seq, serverName);
+                url += "/characters/";
+                url += characterId;
+                url += "/equip/creature?apikey=";
+                url += document.getElementById("ipbApikey").value;
+
+                var request = new XMLHttpRequest();
+                request.open('GET', url, true);
+                request.send();
+                request.onload = function () {
+                    var a1 = JSON.parse(request.response);
+                    var b1 = a1.creature;
+
+                    var c1 = b1.artifact;
+                    var c2 = b1.clone;
+
+                    setChildren(seq, "GRP_CR_CREATURE",             b1.itemName);
+                    setChildren(seq, "GRP_CR_RED_ARTIFACT",         mkCreature(findTxt(c1, "slotColor", "RED",      "itemName"), findTxt(c1, "slotColor", "RED",      "itemRarity")));
+                    setChildren(seq, "GRP_CR_BLUE_ARTIFACT",        mkCreature(findTxt(c1, "slotColor", "BLUE",     "itemName"), findTxt(c1, "slotColor", "BLUE",     "itemRarity")));
+                    setChildren(seq, "GRP_CR_GREEN_ARTIFACT",       mkCreature(findTxt(c1, "slotColor", "GREEN",    "itemName"), findTxt(c1, "slotColor", "GREEN",    "itemRarity")));
+                    setChildren(seq, "GRP_CR_CREATURE_CLONE",       c2.itemName);
+
+                    searchBuffA(seq, serverName, characterId, opt);
+                }
+            }
+        }
+
+        function searchBuffA(seq, serverName, characterId, opt){
+            //A.버프스킬강화장착장비
+            //B.버프스킬강화장착아바타
+            //C.버프스킬강화크리쳐
+            var url = "https://api.neople.co.kr/df/servers/";
+            url += transServer(seq, serverName);
+            url += "/characters/";
+            url += characterId;
+            url += "/skill/buff/equip/equipment?apikey=";
+            url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+                var b1 = a1.skill;
+                var c1 = b1.buff;
+                var d1 = c1.equipment;
+
+                setChildren(seq, "GRP_BG_TITLE",        mkBuffA(findTxt(d1, "slotId", "TITLE",      "itemName"), findTxt(d1, "slotId", "TITLE",        "itemRarity"), findTxt(d1, "slotId", "TITLE",        "enchant")));
+                setChildren(seq, "GRP_BG_WEAPON",       mkBuffA(findTxt(d1, "slotId", "WEAPON",     "itemName"), findTxt(d1, "slotId", "WEAPON",       "itemRarity")));
+                setChildren(seq, "GRP_BG_JACKET",       mkBuffA(findTxt(d1, "slotId", "JACKET",     "itemName"), findTxt(d1, "slotId", "JACKET",       "itemRarity")));
+                setChildren(seq, "GRP_BG_SHOULDER",     mkBuffA(findTxt(d1, "slotId", "SHOULDER",   "itemName"), findTxt(d1, "slotId", "SHOULDER",     "itemRarity")));
+                setChildren(seq, "GRP_BG_PANTS",        mkBuffA(findTxt(d1, "slotId", "PANTS",      "itemName"), findTxt(d1, "slotId", "PANTS",        "itemRarity")));
+                setChildren(seq, "GRP_BG_SHOES",        mkBuffA(findTxt(d1, "slotId", "SHOES",      "itemName"), findTxt(d1, "slotId", "SHOES",        "itemRarity")));
+                setChildren(seq, "GRP_BG_WAIST",        mkBuffA(findTxt(d1, "slotId", "WAIST",      "itemName"), findTxt(d1, "slotId", "WAIST",        "itemRarity")));
+                setChildren(seq, "GRP_BG_AMULET",       mkBuffA(findTxt(d1, "slotId", "AMULET",     "itemName"), findTxt(d1, "slotId", "AMULET",       "itemRarity")));
+                setChildren(seq, "GRP_BG_WRIST",        mkBuffA(findTxt(d1, "slotId", "WRIST",      "itemName"), findTxt(d1, "slotId", "WRIST",        "itemRarity")));
+                setChildren(seq, "GRP_BG_RING",         mkBuffA(findTxt(d1, "slotId", "RING",       "itemName"), findTxt(d1, "slotId", "RING",         "itemRarity")));
+                setChildren(seq, "GRP_BG_SUPPORT",      mkBuffA(findTxt(d1, "slotId", "SUPPORT",    "itemName"), findTxt(d1, "slotId", "SUPPORT",      "itemRarity")));
+                setChildren(seq, "GRP_BG_MAGIC_STON",   mkBuffA(findTxt(d1, "slotId", "MAGIC_STON", "itemName"), findTxt(d1, "slotId", "MAGIC_STON",   "itemRarity")));
+                setChildren(seq, "GRP_BG_EARRING",      mkBuffA(findTxt(d1, "slotId", "EARRING",    "itemName"), findTxt(d1, "slotId", "EARRING",      "itemRarity")));
+
+                searchBuffB(seq, serverName, characterId, opt);
+            }
+        }
+
+        function searchBuffB(seq, serverName, characterId, opt){
+            var url = "https://api.neople.co.kr/df/servers/";
+            url += transServer(seq, serverName);
+            url += "/characters/";
+            url += characterId;
+            url += "/skill/buff/equip/avatar?apikey=";
+            url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+                var b1 = a1.skill;
+                var c1 = b1.buff;
+                var d1 = c1.avatar;
+
+                var buffName = c1.skillInfo;
+                    buffName = buffName.name;
+
+                setChildren(seq, "GRP_BG_JACKET_A",     mkBuffB(findTxt(d1, "slotId", "JACKET", "emblems"), findTxt(d1, "slotId", "JACKET", "optionAbility"), buffName));
+                setChildren(seq, "GRP_BG_PANTS_A",      mkBuffB(findTxt(d1, "slotId", "PANTS",  "emblems"), null,                                             buffName));
+
+                searchBuffC(seq, serverName, characterId, opt);
+            }
+        }
+
+        function searchBuffC(seq, serverName, characterId, opt){
+            var url = "https://api.neople.co.kr/df/servers/";
+            url += transServer(seq, serverName);
+            url += "/characters/";
+            url += characterId;
+            url += "/skill/buff/equip/creature?apikey=";
+            url += document.getElementById("ipbApikey").value;
+
+            var request = new XMLHttpRequest();
+            request.open('GET', url, true);
+            request.send();
+            request.onload = function () {
+                var a1 = JSON.parse(request.response);
+
+                setChildren(seq, "GRP_BG_CREATURE",     mkBuffC(a1.skill));
             }
         }
     </script>
@@ -505,9 +763,9 @@
     <div style=""><button type="button" style="height: 100%;" onclick="onclick_add()">추가</button> </div>
     <div style=""><button type="button" style="height: 100%;" onclick="onclick_doSearch()">조회</button> </div>
 </div>
-<div>
-    <div><input type="text" id="ipbAdvenName" style="width: 300px;"><button type="button" onclick="getChacters()">dd</button></div>
-</div>
+<!--<div>-->
+<!--    <div><input type="text" id="ipbAdvenName" style="width: 300px;"><button type="button">dd</button></div>-->
+<!--</div>-->
 
 <div id="tab">
     <div class="tab_row">
@@ -628,43 +886,43 @@
     <!--강화/증폭-악세/특장 끝-->
 
     <!--융합석[각인]-방어구 시작-->
-    <div class="tb_col GRP_UK_A" id="GRP_UK_WEAPON" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_WEAPON" style="">
         <div class="tb_header">무기</div>
     </div>
-    <div class="tb_col GRP_UK_A" id="GRP_UK_JACKET" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_JACKET" style="">
         <div class="tb_header">상의</div>
     </div>
-    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOULDER" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOULDER" style="">
         <div class="tb_header">머리어깨</div>
     </div>
-    <div class="tb_col GRP_UK_A" id="GRP_UK_PANTS" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_PANTS" style="">
         <div class="tb_header">하의</div>
     </div>
-    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOES" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_SHOES" style="">
         <div class="tb_header">신발</div>
     </div>
-    <div class="tb_col GRP_UK_A" id="GRP_UK_WAIST" style="width: 350px;">
+    <div class="tb_col GRP_UK_A" id="GRP_UK_WAIST" style="">
         <div class="tb_header">벨트</div>
     </div>
     <!--융합석[각인]-방어구 끝-->
 
     <!--융합석[각인]-악세/특장 시작-->
-    <div class="tb_col GRP_UK_B" id="GRP_UK_AMULET" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_AMULET" style="">
         <div class="tb_header">목걸이</div>
     </div>
-    <div class="tb_col GRP_UK_B" id="GRP_UK_WRIST" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_WRIST" style="">
         <div class="tb_header">팔찌</div>
     </div>
-    <div class="tb_col GRP_UK_B" id="GRP_UK_RING" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_RING" style="">
         <div class="tb_header">반지</div>
     </div>
-    <div class="tb_col GRP_UK_B" id="GRP_UK_SUPPORT" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_SUPPORT" style="">
         <div class="tb_header">보조장비</div>
     </div>
-    <div class="tb_col GRP_UK_B" id="GRP_UK_MAGIC_STON" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_MAGIC_STON" style="">
         <div class="tb_header">마법석</div>
     </div>
-    <div class="tb_col GRP_UK_B" id="GRP_UK_EARRING" style="width: 350px;">
+    <div class="tb_col GRP_UK_B" id="GRP_UK_EARRING" style="">
         <div class="tb_header">귀걸이</div>
     </div>
     <!--융합석[각인]-악세/특장 끝-->
@@ -758,13 +1016,16 @@
         <div class="tb_header">크리쳐</div>
     </div>
     <div class="tb_col GRP_CR_A" id="GRP_CR_RED_ARTIFACT" style="">
-        <div class="tb_header">스킨</div>
+        <div class="tb_header">레드아티팩트</div>
     </div>
     <div class="tb_col GRP_CR_A" id="GRP_CR_BLUE_ARTIFACT" style="">
-        <div class="tb_header">오라</div>
+        <div class="tb_header">블루아티팩트</div>
     </div>
     <div class="tb_col GRP_CR_A" id="GRP_CR_GREEN_ARTIFACT" style="">
-        <div class="tb_header">무기</div>
+        <div class="tb_header">그린아티팩트</div>
+    </div>
+    <div class="tb_col GRP_CR_A" id="GRP_CR_CREATURE_CLONE" style="">
+        <div class="tb_header">크리쳐스킨</div>
     </div>
     <!--크리쳐 끝-->
 
