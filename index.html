@@ -95,6 +95,7 @@
             overflow: auto;
             height: 800px;
             justify-content: start;
+            border: 1px solid #333333;
         }
 
         .tb_col {
@@ -190,6 +191,8 @@
                 "serverName": "바칼"
             }
         ];
+
+        var johe_cnt = 0;
 
         //서버한글 -> 영문명으로 변환
         function transServer(seq, serverName) {
@@ -420,6 +423,10 @@
          * @param opt   구분자
          */
         function setUtil(grp, opt){
+            if(johe_cnt < 1){
+                alert("검사할 데이터가 없습니다!!");
+                return 0;
+            }
             //카지노컷
             var fameArry = document.getElementsByClassName("GRP_IF_FAME");
             var grpFameId = "";
@@ -505,6 +512,24 @@
                     }
                 }
             }
+
+            //아바타
+            var a5Arry = getContentsId("GRP_AV");
+            var b5Arry = new Array();
+            var grpAvId = "";
+            for(var i = 0; i < a5Arry.length; i++){
+                b5Arry = document.getElementsByClassName(a5Arry[i]);
+                for(var j = 0; j < b5Arry.length; j++){
+                    grpAvId = document.getElementById(b5Arry[j].getAttribute('id'));
+                    if(grpAvId.innerText.includes("빛나는")){
+                        grpAvId.style.backgroundColor = UNCOMMON;
+                    }else if(grpAvId.innerText.includes("화려한")) {
+                        grpAvId.style.backgroundColor = RARE;
+                    }else if(grpAvId.innerText.includes("찬란한")) {
+                        grpAvId.style.backgroundColor = UNIQUE;
+                    }
+                }
+            }
         }
 
         /////////////////////////////////////////
@@ -586,6 +611,7 @@
             var a1 = document.getElementById("GRP_FX_SEQ").children;
             var b1 = document.getElementById("GRP_FX_SERVER").children;
             var c1 = document.getElementById("GRP_FX_CHARNM").children;
+            johe_cnt = 0;
 
             //row개수 구해서 for문 돌리기
             for(var i = 0; i < a1.length; i++){
@@ -847,7 +873,7 @@
 
                 setChildren(seq, "GRP_BG_CREATURE",     mkBuffC(a1.skill));
 
-                setUtil();
+                johe_cnt++;
             }
         }
     </script>
@@ -1198,8 +1224,8 @@
     <!--버프강화 끝-->
 </div>
 <div>
+    <div style="text-align: right;"><button type="button" onclick="setUtil();">검사하기</button> </div>
     <div><h3>9월4주차주간던파</h3> 카지노 : <span id="CASINO_REP"></span></div>
-
 </div>
 
 
